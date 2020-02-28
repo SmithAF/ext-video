@@ -1,0 +1,26 @@
+{
+  "name": "ext-video",
+  "version": "0.0.1",
+  "description": "A video component that plays mp4, dash, and hls",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --config ./webpack/webpack.dev.js",
+    "release": "webpack --config ./webpack/webpack.prod.js",
+    "example": "webpack --config ./webpack/webpack.example.js"
+  },
+  "author": "Andrew Smith",
+  "license": "ISC",
+  "dependencies": {
+    "dashjs": "^3.0.2",
+    "hls.js": "^0.13.2",
+    "shaka-player": "^2.5.9"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.0.6",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
+    "webpack-merge": "^4.2.2"
+  }
+}
