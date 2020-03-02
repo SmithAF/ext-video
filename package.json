@@ -1,8 +1,12 @@
 {
   "name": "ext-video",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A video component that plays mp4, dash, and hls",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:SmithAF/ext-video.git"
+  },
   "scripts": {
     "start": "webpack-dev-server --config ./webpack/webpack.dev.js",
     "release": "webpack --config ./webpack/webpack.prod.js",
