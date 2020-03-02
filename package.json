@@ -1,6 +1,6 @@
 {
   "name": "ext-video",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A video component that plays mp4, dash, and hls",
   "main": "index.js",
   "scripts": {
