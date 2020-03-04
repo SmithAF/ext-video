@@ -1,5 +1,3 @@
-import Hls from 'hls.js';
-import Dash from 'dashjs';
 const video = document.createElement('video');
 export class ExtVideo extends HTMLElement {
   static get observedAttributes() {
@@ -84,9 +82,11 @@ export class ExtVideo extends HTMLElement {
   }
 
   hlsInit(source) {
-    this.hls = new Hls();
-    this.hls.attachMedia(this.video);
-    this.hls.loadSource(source);
+    import(/* webpackChunkName: "Hls" */ 'hls.js').then(({ default: Hls }) => {
+      this.hls = new Hls();
+      this.hls.attachMedia(this.video);
+      this.hls.loadSource(source);
+    });
   }
 
   loadVideo(source) {
@@ -123,11 +123,14 @@ export class ExtVideo extends HTMLElement {
 
   loadDashVideo(source) {
     if (!source) return;
-    this.clean();
-    this.removeAttribute('hls-src');
-    this.removeAttribute('src');
-    this.dash = Dash.MediaPlayer().create();
-    this.dash.initialize(this.video, source);
+
+    import(/*  webpackChunkName: "Dash" */ 'dashjs').then(({ MediaPlayer }) => {
+      this.clean();
+      this.removeAttribute('hls-src');
+      this.removeAttribute('src');
+      this.dash = MediaPlayer().create();
+      this.dash.initialize(this.video, source);
+    });
   }
 
   setAttribute(qualifiedName, value) {
@@ -144,12 +147,11 @@ export class ExtVideo extends HTMLElement {
    * Is called whenever a observed attribute changes
    *
    * @param {string} atb the attribute that changed
-   * @param {string} current the current attribute value
+   * @param {string} _ the current attribute value
    * @param {string} newValue the new attribute value
    * @memberof HLSPlayer
    */
-  attributeChangedCallback(atb, current, newValue) {
-    console.log('atb');
+  attributeChangedCallback(atb, _, newValue) {
     switch (atb) {
       case 'src':
         this.loadVideo(newValue);
