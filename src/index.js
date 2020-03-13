@@ -1,4 +1,14 @@
 const video = document.createElement('video');
+import { MediaPlayer } from 'dashjs';
+import Hls from 'hls.js';
+
+/**
+ * Extended video element with HLS and Dash support
+ *
+ * @export
+ * @class ExtVideo
+ * @extends {HTMLElement}
+ */
 export class ExtVideo extends HTMLElement {
   static get observedAttributes() {
     return [
@@ -82,11 +92,9 @@ export class ExtVideo extends HTMLElement {
   }
 
   hlsInit(source) {
-    import(/* webpackChunkName: "Hls" */ 'hls.js').then(({ default: Hls }) => {
-      this.hls = new Hls();
-      this.hls.attachMedia(this.video);
-      this.hls.loadSource(source);
-    });
+    this.hls = new Hls();
+    this.hls.attachMedia(this.video);
+    this.hls.loadSource(source);
   }
 
   loadVideo(source) {
@@ -123,14 +131,11 @@ export class ExtVideo extends HTMLElement {
 
   loadDashVideo(source) {
     if (!source) return;
-
-    import(/*  webpackChunkName: "Dash" */ 'dashjs').then(({ MediaPlayer }) => {
-      this.clean();
-      this.removeAttribute('hls-src');
-      this.removeAttribute('src');
-      this.dash = MediaPlayer().create();
-      this.dash.initialize(this.video, source);
-    });
+    this.clean();
+    this.removeAttribute('hls-src');
+    this.removeAttribute('src');
+    this.dash = MediaPlayer().create();
+    this.dash.initialize(this.video, source);
   }
 
   setAttribute(qualifiedName, value) {
@@ -168,5 +173,5 @@ export class ExtVideo extends HTMLElement {
     }
   }
 }
-
+export default ExtVideo;
 window.customElements.define('ext-video', ExtVideo);

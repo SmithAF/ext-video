@@ -1,8 +1,8 @@
 {
   "name": "ext-video",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A video component that plays mp4, dash, and hls",
-  "main": "index.js",
+  "main": "./dist/main.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:SmithAF/ext-video.git"
@@ -15,9 +15,8 @@
   "author": "Andrew Smith",
   "license": "ISC",
   "dependencies": {
-    "dashjs": "^3.0.2",
-    "hls.js": "^0.13.2",
-    "shaka-player": "^2.5.9"
+    "dashjs": "^3.0.3",
+    "hls.js": "^0.13.2"
   },
   "devDependencies": {
     "babel-loader": "^8.0.6",
