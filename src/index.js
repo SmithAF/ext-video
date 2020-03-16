@@ -1,4 +1,3 @@
-const video = document.createElement('video');
 import { MediaPlayer } from 'dashjs';
 import Hls from 'hls.js';
 
@@ -7,145 +6,173 @@ import Hls from 'hls.js';
  *
  * @export
  * @class ExtVideo
- * @extends {HTMLElement}
+ * @extends {HTMLVideoElement}
  */
-export class ExtVideo extends HTMLElement {
+export class ExtVideo extends HTMLVideoElement {
   static get observedAttributes() {
-    return [
-      'autoplay',
-      'autoPictureInPicture',
-      'buffered',
-      'controls',
-      'controlslist',
-      'crossorigin',
-      'currentTime',
-      'disablePictureInPicture',
-      'disableRemotePlayback',
-      'duration',
-      'height',
-      'intrinsicsize',
-      'loop',
-      'muted',
-      'playsinline',
-      'poster',
-      'preload',
-      'src',
-      'width',
-      'style',
-      'hls-src'
-    ];
-  }
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' }).append(video.cloneNode(true));
+    return ['src'];
   }
 
+
+  /**
+   * @see {HTMLVideoElement.src}
+   * Extends src to handle clearing of HLS and DASH content when required
+   *
+   * @memberof ExtVideo
+   */
   set src(source) {
-    this.loadVideo(source);
+    if (this.isVideo(source)) this.clean();
+    super.src = source;
   }
 
-  get src() {
-    return this.video.src;
-  }
-  set hlsSrc(source) {
-    this.loadHlsVideo(source);
-  }
-  set dashSrc(source) {
-    this.loadDashVideo(source);
+
+  /**
+   * @see {HTMLVideoElement.setAttribute}
+   * Extends setAttribute to handle clearing of HLS and DASH content when required
+   *
+   * @param {*} qualifiedName
+   * @param {*} value
+   * @memberof ExtVideo
+   */
+  setAttribute(qualifiedName, value) {
+    if (qualifiedName === 'src' && this.isVideo(value)) this.clean();
+    super.setAttribute(qualifiedName, value);
   }
 
-  get hlsSrc() {
-    return this.video.src;
+  /**
+   * Handles cleans up of dash and hls playback
+   *
+   * @memberof ExtVideo
+   */
+  clean() {
+    if (this.dash) {
+      const autoplay = this.hasAttribute('autoplay');
+      this.dash.reset();
+      if (autoplay) {
+        this.setAttribute('autoplay', void 0);
+      }
+      this.dash = void 0;
+    }
+    if (this.hls) {
+      this.hls.destroy();
+      this.hls = void 0;
+    }
   }
 
-  get dashSrc() {
-    return this.video.src;
+  /**
+   * short hand way for searching source strings for patterns
+   *
+   * @param {string} source source string to be test
+   * @param {string} is string partial being search for
+   * @returns
+   * @memberof ExtVideo
+   */
+  is(source, is) {
+    return 0 < source.toLowerCase().indexOf(is);
   }
 
   /**
    *
    *
-   * @readonly
-   * @returns {HTMLVideoElement} video element
+   * @param {string} source source url attempting to be used
+   * @returns {boolean}
    * @memberof ExtVideo
    */
-  get video() {
-    // @ts-ignore
-    return this.shadowRoot.firstChild;
+  isBlob(source) {
+    return this.is(source, 'blob:http');
+  }
+  /**
+   *
+   *
+   * @param {string} source source url attempting to be used
+   * @returns {boolean}
+   * @memberof ExtVideo
+   */
+  isM3u8(source) {
+    return this.is(source, '.m3u8');
+  }
+  /**
+   *
+   *
+   * @param {string} source source url attempting to be used
+   * @returns {boolean}
+   * @memberof ExtVideo
+   */
+  isMpd(source) {
+    return this.is(source, '.mpd');
+  }
+  /**
+   *
+   *
+   * @param {string} source source url attempting to be used
+   * @returns {boolean}
+   * @memberof ExtVideo
+   */
+  isMp4(source) {
+    return this.is(source, '.mp4');
   }
 
-  clean() {
-    if (this.hls) {
-      this.hls.destroy();
-      this.hls = void 0;
-    }
-
-    if (this.dash) {
-      const autoplay = this.video.hasAttribute('autoplay');
-      this.dash.reset();
-      if (autoplay) {
-        this.video.setAttribute('autoplay', void 0);
-      }
-      this.dash = void 0;
-    }
-    this.video.src = '';
+  /**
+   *
+   *
+   * @param {string} source source url attempting to be used
+   * @returns {boolean}
+   * @memberof ExtVideo
+   */
+  isVideo(source) {
+    return this.isM3u8(source) || this.isMpd(source) || this.isMp4(source);
   }
 
+  /**
+   * Initialize HLS video
+   *
+   * @param {string} source
+   * @memberof ExtVideo
+   */
   hlsInit(source) {
     this.hls = new Hls();
-    this.hls.attachMedia(this.video);
+    this.hls.attachMedia(this);
     this.hls.loadSource(source);
   }
 
+  /**
+   * Handles loading of non-standard browser video formats. Falls back to default browser behavior
+   *
+   * @param {string} source
+   * @returns
+   * @memberof ExtVideo
+   */
   loadVideo(source) {
     if (!source) return;
-    if (0 < source.toLowerCase().indexOf('.m3u8')) {
-      this.loadHlsVideo(source);
-      return;
-    }
-    if (0 < source.toLowerCase().indexOf('.mpd')) {
-      this.loadDashVideo(source);
-      return;
-    }
-    this.clean();
-    this.removeAttribute('hls-src');
-    this.removeAttribute('dash-src');
-    this.video.src = source;
+    else if (this.isM3u8(source)) return void this.loadHlsVideo(source);
+    else if (this.isMpd(source)) return void this.loadDashVideo(source);
   }
 
+  /**
+   * Readies player for HLS playback
+   *
+   * @param {string} source
+   * @returns
+   * @memberof ExtVideo
+   */
   loadHlsVideo(source) {
     if (!source) return;
     this.clean();
-    this.removeAttribute('src');
-    this.removeAttribute('dash-src');
     this.hlsInit(source);
   }
 
-  addEventListener(type, listener) {
-    this.video.addEventListener(type, listener);
-  }
-
-  removeEventListener(type, listener) {
-    this.video.removeEventListener(type, listener);
-  }
-
+  /**
+   * Readies player for Dash playback
+   *
+   * @param {*} source
+   * @returns
+   * @memberof ExtVideo
+   */
   loadDashVideo(source) {
     if (!source) return;
     this.clean();
-    this.removeAttribute('hls-src');
-    this.removeAttribute('src');
     this.dash = MediaPlayer().create();
-    this.dash.initialize(this.video, source);
-  }
-
-  setAttribute(qualifiedName, value) {
-    super.setAttribute(qualifiedName, value);
-    this.video.setAttribute(qualifiedName, value);
-  }
-
-  removeAttribute(qualifiedName) {
-    super.removeAttribute(qualifiedName);
-    this.video.removeAttribute(qualifiedName);
+    this.dash.initialize(this, source, this.hasAttribute('autoplay'));
   }
 
   /**
@@ -159,19 +186,11 @@ export class ExtVideo extends HTMLElement {
   attributeChangedCallback(atb, _, newValue) {
     switch (atb) {
       case 'src':
+        if (typeof newValue !== 'string' || this.isBlob(newValue)) return;
         this.loadVideo(newValue);
-        break;
-      case 'hls-src':
-        this.loadHlsVideo(newValue);
-        break;
-      case 'dash-src':
-        this.loadDashVideo(newValue);
-        break;
-      default:
-        this.video.setAttribute(atb, newValue);
         break;
     }
   }
 }
 export default ExtVideo;
-window.customElements.define('ext-video', ExtVideo);
+window.customElements.define('ext-video', ExtVideo, { extends: 'video' });
