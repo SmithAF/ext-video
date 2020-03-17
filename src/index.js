@@ -9,6 +9,15 @@ import Hls from 'hls.js';
  * @extends {HTMLVideoElement}
  */
 export class ExtVideo extends HTMLVideoElement {
+
+  /**
+   * Attributes ExtVideo is watching
+   *
+   * @readonly
+   * @static
+   * @returns {Array<string>}
+   * @memberof ExtVideo
+   */
   static get observedAttributes() {
     return ['src'];
   }
@@ -18,6 +27,8 @@ export class ExtVideo extends HTMLVideoElement {
    * @see {HTMLVideoElement.src}
    * Extends src to handle clearing of HLS and DASH content when required
    *
+   * @param {string} source
+   * @returns {void}
    * @memberof ExtVideo
    */
   set src(source) {
@@ -30,8 +41,9 @@ export class ExtVideo extends HTMLVideoElement {
    * @see {HTMLVideoElement.setAttribute}
    * Extends setAttribute to handle clearing of HLS and DASH content when required
    *
-   * @param {*} qualifiedName
-   * @param {*} value
+   * @param {string} qualifiedName
+   * @param {string} value
+   * @returns {void}
    * @memberof ExtVideo
    */
   setAttribute(qualifiedName, value) {
@@ -40,8 +52,9 @@ export class ExtVideo extends HTMLVideoElement {
   }
 
   /**
-   * Handles cleans up of dash and hls playback
+   * Handles clean up of dash and hls playback
    *
+   * @returns {void}
    * @memberof ExtVideo
    */
   clean() {
@@ -64,7 +77,7 @@ export class ExtVideo extends HTMLVideoElement {
    *
    * @param {string} source source string to be test
    * @param {string} is string partial being search for
-   * @returns
+   * @returns {boolean}
    * @memberof ExtVideo
    */
   is(source, is) {
@@ -127,6 +140,7 @@ export class ExtVideo extends HTMLVideoElement {
    * Initialize HLS video
    *
    * @param {string} source
+   * @returns {void}
    * @memberof ExtVideo
    */
   hlsInit(source) {
@@ -139,7 +153,7 @@ export class ExtVideo extends HTMLVideoElement {
    * Handles loading of non-standard browser video formats. Falls back to default browser behavior
    *
    * @param {string} source
-   * @returns
+   * @returns {void}
    * @memberof ExtVideo
    */
   loadVideo(source) {
@@ -152,7 +166,7 @@ export class ExtVideo extends HTMLVideoElement {
    * Readies player for HLS playback
    *
    * @param {string} source
-   * @returns
+   * @returns {void}
    * @memberof ExtVideo
    */
   loadHlsVideo(source) {
@@ -164,8 +178,8 @@ export class ExtVideo extends HTMLVideoElement {
   /**
    * Readies player for Dash playback
    *
-   * @param {*} source
-   * @returns
+   * @param {string} source
+   * @returns {void}
    * @memberof ExtVideo
    */
   loadDashVideo(source) {
@@ -181,6 +195,7 @@ export class ExtVideo extends HTMLVideoElement {
    * @param {string} atb the attribute that changed
    * @param {string} _ the current attribute value
    * @param {string} newValue the new attribute value
+   * @returns {void}
    * @memberof HLSPlayer
    */
   attributeChangedCallback(atb, _, newValue) {
